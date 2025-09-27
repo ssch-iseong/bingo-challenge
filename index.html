@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중고등부 정체성 선포빙고 챌린지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page 1 - 시작 페이지 */
+        .intro-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .rules {
+            text-align: left;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .rules li {
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Page 2 - 빙고 게임 */
+        .bingo-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .bingo-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bingo-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .bingo-subtitle {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .bingo-cell {
+            aspect-ratio: 1;
+            background: #f8f9ff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.2;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bingo-cell:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .bingo-cell.completed {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .bingo-cell.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .bingo-cell.has-action {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+            border: 2px solid #667eea;
+            position: relative;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bingo-cell.has-action::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #ffc107, #ff8c00);
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+        }
+
+        .bingo-cell.has-action::after {
+            content: 'Action';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 7px;
+            z-index: 2;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .declaration-text {
+            font-size: 9px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            line-height: 1.2;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px;
+            border-radius: 3px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .action-text {
+            font-size: 7px;
+            color: #666;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            line-height: 1.1;
+            width: 100%;
+            position: relative;
+            z-index: 3;
+        }
+
+        .bingo-cell.has-action.completed {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: #28a745;
+        }
+
+        .bingo-cell.has-action.completed::before {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+
+        .bingo-cell.has-action.completed .declaration-text {
+            color: #155724;
+        }
+
+        .bingo-cell.has-action.completed .action-text {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #28a745;
+        }
+
+        .action-cell {
+            display: none; /* 노란색 박스 제거 */
+        }
+
+        .action-cell.completed {
+            background: linear-gradient(45deg, #ffc107, #ff8c00);
+        }
+
+        .reset-btn, .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover, .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        /* Page 3 - 축하 페이지 */
+        .celebration-container {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 10;
+        }
+
+        .celebration-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .celebration-message {
+            font-size: 24px;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: explode 2s ease-out infinite;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(20);
+                opacity: 0;
+            }
+        }
+
+        .progress-info {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (max-width: 768px) {
+            .intro-container, .bingo-container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .bingo-cell {
+                font-size: 9px;
+            }
+            
+            .title, .bingo-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page 1: 시작 페이지 -->
+    <div class="page active" id="page1">
+        <div class="intro-container">
+            <h1 class="title">중고등부 정체성 선포빙고 챌린지</h1>
+            <ol class="rules">
+                <li>선포문은 하루에 10번이상 선포하기</li>
+                <li>하루에 1칸씩 실천하고 4줄 빙고 완성하기</li>
+                <li>인증이 필요한 Action 단톡방 인증하기^^</li>
+            </ol>
+            <div class="form-group">
+                <label for="className">반:</label>
+                <input type="text" id="className" placeholder="반 이름을 입력하세요 (예: 1학년, 고1반 등)">
+            </div>
+            <div class="form-group">
+                <label for="name">이름:</label>
+                <input type="text" id="name" placeholder="이름을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="phone">전화번호:</label>
+                <input type="tel" id="phone" placeholder="전화번호를 입력하세요">
+            </div>
+            <button class="start-btn" onclick="startChallenge()">챌린지 시작하기!</button>
+        </div>
+    </div>
+
+    <!-- Page 2: 빙고 게임 -->
+    <div class="page" id="page2">
+        <div class="bingo-container">
+            <div class="bingo-header">
+                <h1 class="bingo-title">10월 Challenge</h1>
+                <h2 class="bingo-subtitle">정체성 선포 빙고</h2>
+                <div class="user-info" id="userInfo"></div>
+                <ol class="rules">
+                    <li>선포문은 하루에 10번이상 선포하기</li>
+                    <li>하루에 1칸씩 실천하고 4줄 빙고 완성하기</li>
+                    <li>인증이 필요한 Action 단톡방 인증하기^^</li>
+                </ol>
+            </div>
+            
+            <div class="bingo-grid" id="bingoGrid"></div>
+            
+            <div style="text-align: center;">
+                <button class="back-btn" onclick="goToPage(1)">처음으로</button>
+                <button class="reset-btn" onclick="resetBingo()">빙고 초기화</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 3: 축하 페이지 -->
+    <div class="page" id="page3">
+        <div class="celebration-container">
+            <h1 class="celebration-title">🎉 축하합니다! 🎉</h1>
+            <div class="progress-info" id="bingoProgress"></div>
+            <p class="celebration-message">하나님께서 당신을 정말 기뻐하십니다</p>
+            <button class="start-btn" onclick="goToPage(2)">빙고판으로 돌아가기</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = { className: '', name: '', phone: '' };
+        let bingoData = [];
+        let completedCells = new Set();
+
+        // 빙고 칸 내용 (선포문과 Action이 함께 들어간 형태)
+        const bingoTexts = [
+            // 첫 번째 줄
+            { text: "나는 소금입니다!", action: "양치하기 전 거울을 보고 선포하기", hasAction: true }, 
+            "성령님의 도우심으로 오늘도 승리하는 자입니다! 완전 기뻐하시는 자입니다!", 
+            "나는 주님이 완죤 기뻐하시는 자입니다!",
+            { text: "내 안에 하나님의 DNA가 있다!", action: "12일 챌린지 정주행! Day.12 시청하고 댓글인증", hasAction: true }, 
+            "내게 능력 주시는 자 안에서 모든 것을 할 수 있습니다!",
+            
+            // 두 번째 줄  
+            "나는 예수님을 닮아 겸손하고 온유합니다!",
+            "나는 다윗처럼 감정과 상관없이 찬양하는 자입니다!", 
+            { text: "예수님 사랑합니다!!!", action: "담임목사님 3분 말씀 좋아요 & 댓글 남기기", hasAction: true }, 
+            "나는 빛입니다!!", 
+            { text: "길을 비켜라 빛이 나가신다~!", action: "등교 전 집을 나설 때 문 열며 선포하기", hasAction: true },
+            
+            // 세 번째 줄
+            { text: "나는 하나님의 반영입니다!", action: "주일예배 15분 일찍 와서 엘리야 기도회 함께 하기!", hasAction: true },
+            "나는 여호와로 인하여 기뻐하는 자입니다!", 
+            "나는 하나님의 사랑받는 자녀입니다!", 
+            "예수님의 성품이 나의 성품입니다!", 
+            { text: "예수님 감사합니다!!", action: "감사제목 5가지 이상 셀 톡방에 인증!!", hasAction: true },
+            
+            // 네 번째 줄
+            "나는 주님의 존귀한 자녀입니다!",
+            "나는 중독으로부터 자유한 자입니다!", 
+            { text: "나는 작은 것에도 순종하는 자입니다!", action: "9월 27일(금)!! 금요예배 드리러 나와서 담임쌤이랑 셀카 찍기", hasAction: true }, 
+            "내가 어디를 가든지 선하심과 인자하심이 나를 따릅니다!",
+            { text: "나는 기도입니다!", action: "성전기도 30분 이상 한 뒤 인증샷 찍고 셀 톡방 인증!", hasAction: true }
+        ];
+
+        function startChallenge() {
+            const className = document.getElementById('className').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!className || !name || !phone) {
+                alert('반, 이름, 전화번호를 모두 입력해주세요!');
+                return;
+            }
+
+            currentUser = { className, name, phone };
+            document.getElementById('userInfo').innerHTML = `
+                <strong>${className}</strong> ${name} (${phone})
+            `;
+            createBingoGrid();
+            goToPage(2);
+        }
+
+        function createBingoGrid() {
+            const grid = document.getElementById('bingoGrid');
+            grid.innerHTML = '';
+            
+            bingoTexts.forEach((item, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                
+                if (typeof item === 'object' && item.hasAction) {
+                    cell.classList.add('has-action');
+                    
+                    const declarationDiv = document.createElement('div');
+                    declarationDiv.className = 'declaration-text';
+                    declarationDiv.textContent = item.text;
+                    
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'action-text';
+                    actionDiv.textContent = item.action;
+                    
+                    cell.appendChild(declarationDiv);
+                    cell.appendChild(actionDiv);
+                } else {
+                    cell.textContent = typeof item === 'string' ? item : item.text;
+                }
+                
+                cell.onclick = () => toggleCell(index, cell);
+                grid.appendChild(cell);
+            });
+        }
+
+        function toggleCell(index, cellElement) {
+            if (completedCells.has(index)) {
+                completedCells.delete(index);
+                cellElement.classList.remove('completed');
+            } else {
+                completedCells.add(index);
+                cellElement.classList.add('completed');
+                
+                // 매 클릭마다 즉시 3페이지로 이동
+                setTimeout(() => {
+                    showCurrentProgress();
+                }, 300);
+            }
+        }
+
+        function showCurrentProgress() {
+            const completedCount = completedCells.size;
+            const bingoCount = getBingoCount();
+            
+            document.getElementById('bingoProgress').innerHTML = `
+                <strong>${currentUser.className}</strong><br>
+                <strong>${currentUser.name}</strong>님<br>
+                <strong>${completedCount}/20</strong>개 완료!<br>
+                ${bingoCount > 0 ? `<strong>${bingoCount}줄 빙고</strong> 달성! 🎉` : ''}
+            `;
+            
+            goToPage(3);
+            
+            // 4줄 빙고 달성시 폭죽
+            if (bingoCount >= 4) {
+                createFireworks();
+                // 축하 메시지 업데이트
+                setTimeout(() => {
+                    document.querySelector('.celebration-title').innerHTML = '🎉 4줄 빙고 완성! 🎉';
+                    document.querySelector('.celebration-message').innerHTML = '하나님께서 당신을 정말 기뻐하십니다!<br>정말 훌륭합니다! 🎊';
+                }, 500);
+            }
+        }
+
+        function getBingoCount() {
+            const lines = [
+                // 가로 줄들
+                [0, 1, 2, 3, 4],
+                [5, 6, 7, 8, 9],
+                [10, 11, 12, 13, 14],
+                [15, 16, 17, 18, 19],
+                // 세로 줄들
+                [0, 5, 10, 15],
+                [1, 6, 11, 16],
+                [2, 7, 12, 17],
+                [3, 8, 13, 18],
+                [4, 9, 14, 19],
+                // 대각선
+                [0, 6, 12, 18],
+                [4, 8, 12, 16]
+            ];
+
+            let bingoCount = 0;
+            lines.forEach(line => {
+                if (line.every(index => completedCells.has(index))) {
+                    bingoCount++;
+                }
+            });
+
+            return bingoCount;
+        }
+
+        function createFireworks() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b'];
+            
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    document.body.appendChild(firework);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(firework);
+                    }, 2000);
+                }, i * 200);
+            }
+        }
+
+        function resetBingo() {
+            if (confirm('빙고를 초기화하시겠습니까?')) {
+                completedCells.clear();
+                createBingoGrid();
+            }
+        }
+
+        function goToPage(pageNumber) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(`page${pageNumber}`).classList.add('active');
+        }
+
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            goToPage(1);
+        };
+    </script>
+</body>
+</html>
