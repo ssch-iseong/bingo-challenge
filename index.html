@@ -428,6 +428,9 @@
             <div style="text-align: center;">
                 <button class="back-btn" onclick="goToPage(1)">처음으로</button>
                 <button class="reset-btn" onclick="resetBingo()">빙고 초기화</button>
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    💾 진행상황이 자동으로 저장됩니다
+                </div>
             </div>
         </div>
     </div>
@@ -446,6 +449,45 @@
         let currentUser = { className: '', name: '', phone: '' };
         let bingoData = [];
         let completedCells = new Set();
+
+        // 데이터 저장 및 불러오기 함수들
+        function saveUserData() {
+            const userData = {
+                user: currentUser,
+                completed: Array.from(completedCells),
+                timestamp: new Date().toISOString()
+            };
+            try {
+                const userKey = `bingoData_${currentUser.className}_${currentUser.name}_${currentUser.phone}`;
+                localStorage.setItem(userKey, JSON.stringify(userData));
+            } catch (e) {
+                console.log('저장 공간을 사용할 수 없습니다.');
+            }
+        }
+
+        function loadUserData() {
+            try {
+                const userKey = `bingoData_${currentUser.className}_${currentUser.name}_${currentUser.phone}`;
+                const savedData = localStorage.getItem(userKey);
+                if (savedData) {
+                    const userData = JSON.parse(savedData);
+                    completedCells = new Set(userData.completed);
+                    return true;
+                }
+            } catch (e) {
+                console.log('저장된 데이터를 불러올 수 없습니다.');
+            }
+            return false;
+        }
+
+        function clearUserData() {
+            try {
+                const userKey = `bingoData_${currentUser.className}_${currentUser.name}_${currentUser.phone}`;
+                localStorage.removeItem(userKey);
+            } catch (e) {
+                console.log('데이터를 삭제할 수 없습니다.');
+            }
+        }
 
         // 빙고 칸 내용 (선포문과 Action이 함께 들어간 형태)
         const bingoTexts = [
@@ -492,7 +534,19 @@
             document.getElementById('userInfo').innerHTML = `
                 <strong>${className}</strong> ${name} (${phone})
             `;
+            
+            // 기존 데이터 불러오기
+            const hasExistingData = loadUserData();
+            
             createBingoGrid();
+            
+            // 기존 데이터가 있으면 알림
+            if (hasExistingData && completedCells.size > 0) {
+                setTimeout(() => {
+                    alert(`이전에 체크한 ${completedCells.size}개의 항목을 불러왔습니다!`);
+                }, 500);
+            }
+            
             goToPage(2);
         }
 
@@ -503,6 +557,11 @@
             bingoTexts.forEach((item, index) => {
                 const cell = document.createElement('div');
                 cell.className = 'bingo-cell';
+                
+                // 저장된 완료 상태 적용
+                if (completedCells.has(index)) {
+                    cell.classList.add('completed');
+                }
                 
                 if (typeof item === 'object' && item.hasAction) {
                     cell.classList.add('has-action');
@@ -533,12 +592,15 @@
             } else {
                 completedCells.add(index);
                 cellElement.classList.add('completed');
-                
-                // 매 클릭마다 즉시 3페이지로 이동
-                setTimeout(() => {
-                    showCurrentProgress();
-                }, 300);
             }
+            
+            // 변경사항 저장
+            saveUserData();
+            
+            // 매 클릭마다 즉시 3페이지로 이동
+            setTimeout(() => {
+                showCurrentProgress();
+            }, 300);
         }
 
         function showCurrentProgress() {
@@ -613,9 +675,11 @@
         }
 
         function resetBingo() {
-            if (confirm('빙고를 초기화하시겠습니까?')) {
+            if (confirm('빙고를 초기화하시겠습니까? 모든 진행상황이 삭제됩니다.')) {
                 completedCells.clear();
+                clearUserData();
                 createBingoGrid();
+                alert('빙고가 초기화되었습니다.');
             }
         }
 
